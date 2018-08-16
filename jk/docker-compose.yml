@@ -1,0 +1,55 @@
+version: "3"
+services:
+  backserver:
+    hostname: MonitorBack
+    build: ./nginx
+    volumes:
+      - ./nginx/nginx.conf:/usr/local/nginx/conf/nginx.conf:rw
+      - ./nginx/zabbix/3.0.5/web/:/usr/local/nginx/html/monitor:rw
+      - ./nginx/zabbix/3.0.5/zabbix_server.conf:/usr/local/zabbix/etc/zabbix_server.conf:rw
+      #- ./nginx/zabbix/3.0.5/logs/zabbix_server.log:/tmp/zabbix_server.log
+    ports:
+      - 80:80
+      - 10050:10050
+      - 10051:10051
+    networks:
+      jk:
+        ipv4_address: 172.1.0.80
+    restart: always
+    depends_on:
+      - dbserver
+      - webserver
+
+  webserver:
+    hostname: JKMonitor
+    build: ./monitor
+    restart: always
+    volumes:
+      - ./monitor/monitor.war:/usr/local/apache-tomcat-8.5.24/webapps/monitor.war
+    ports:
+      - 8080:8080
+    networks:
+      jk:
+        ipv4_address: 172.1.0.88
+    depends_on:
+      - dbserver
+
+  dbserver:
+    hostname: MonitorDB
+    build: ./mysql
+    volumes:
+      #- ./my.cnf:/etc/my.cnf.d/zili.cnf:rw #在dockerfile中配置并赋权
+      - ./mysql/datadir:/var/lib/mysql:rw
+    #ports:
+    #  - 3306:3306
+    networks:
+      jk:
+        ipv4_address: 172.1.0.33
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'xxxxx'
+      MYSQL_ROOT_HOST: '%'
+
+networks:
+  jk:
+    external: true
