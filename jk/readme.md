@@ -61,8 +61,8 @@ docker compose编排会生成相应的镜像,然后通过镜像去生成容器.
 #create db container
 docker run --name jk_dbserver -d \
 --network=jk --ip=172.1.0.33 \
--e "MYSQL_ROOT_PASSWORD: 'xxxxx'" \
--e "MYSQL_ROOT_HOST: '%'" \
+-e MYSQL_ROOT_PASSWORD='xxxxx' \
+-e MYSQL_ROOT_HOST='%' \
 -v /root/jk/mysql/datadir:/var/lib/mysql \
 jk_dbserver
 
